@@ -1,0 +1,62 @@
+version: "3.8"
+services: 
+  mongo:
+    container_name: "mongo-db"
+    image: mongo:4
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - BE-node-network
+
+  sql:
+    container_name: "sql-db"
+    image: mysql:8.0.33
+    volumes:
+      - sql-data:/var/lib/mysql
+    networks:
+      - BE-java-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=emartdbpass
+      - MYSQL_DATABASE=books
+
+  node_api:
+    container_name: "node_api"
+    build:
+      context: "./nodeapi"
+    networks:
+      - FE-network
+      - BE-node-network
+    depends_on:
+      - mongo
+
+
+  java_api:
+    container_name: "java_api"
+    build:
+      context: "./javaapi"
+    networks:
+      - FE-network
+      - BE-java-network
+    depends_on:
+      - sql
+
+  angular:
+    container_name: "client"
+    build:
+      context: "./client"
+    networks:
+      - FE-network
+    ports:
+      - "4200:4200"
+    depends_on:
+      - java_api
+      - node_api
+
+volumes:
+  mongo-data:
+  sql-data:
+
+networks:
+  FE-network:
+  BE-node-network:
+  BE-java-network:
