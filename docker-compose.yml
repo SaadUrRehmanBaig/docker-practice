@@ -1,7 +1,7 @@
 version: "3.8"
 services: 
   mongo:
-    container_name: "mongo-db"
+    container_name: "mongo"
     image: mongo:4
     volumes:
       - mongo-data:/data/db
@@ -9,7 +9,7 @@ services:
       - BE-node-network
 
   sql:
-    container_name: "sql-db"
+    container_name: "sql"
     image: mysql:8.0.33
     volumes:
       - sql-data:/var/lib/mysql
@@ -46,11 +46,22 @@ services:
       context: "./client"
     networks:
       - FE-network
-    ports:
-      - "4200:4200"
     depends_on:
       - java_api
       - node_api
+
+  nginx:
+    container_name: "nginx"
+    image: nginx:latest
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    networks:
+      - FE-network
+    ports:
+      - "80:80"
+    depends_on:
+      - angular
+
 
 volumes:
   mongo-data:
